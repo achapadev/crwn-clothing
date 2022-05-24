@@ -7,6 +7,8 @@ import {
   signInWithRedirect,
   signInWithPopup,
   GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  // don't need a provider from createUserWithEmailAndPassword because its a native provider
 } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -40,7 +42,11 @@ export const signInWithGooglePopup = () => signInWithPopup(auth, provider);
 // create and connect to our database in console
 export const db = getFirestore();
 
-export const createUserDocumentFromAuth = async (userAuth) => {
+export const createUserDocumentFromAuth = async (
+  userAuth,
+  additionalInformation
+) => {
+  if (!userAuth) return;
   // takes 3 arguments: a database, collection, identifier
   // we have user doc reference and from it we got a snapshot which allows
   //   us to check whether or not there is an instance of it that exists and access the data
@@ -64,6 +70,7 @@ export const createUserDocumentFromAuth = async (userAuth) => {
         displayName,
         email,
         createdAt,
+        ...additionalInformation,
       });
     } catch (error) {
       console.log('error creating the user', error.message);
@@ -72,6 +79,11 @@ export const createUserDocumentFromAuth = async (userAuth) => {
 
   // if user data exists
   return userDocRef;
-
   // return userDocRef
+};
+
+// we are making an authenticated user inside of our firebase authentication tab
+export const createAuthUserWithEmailAndPassword = async (email, password) => {
+  if (!email || !password) return;
+  return await createUserWithEmailAndPassword(auth, email, password);
 };
